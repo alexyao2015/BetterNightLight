@@ -71,14 +71,16 @@ fun DragToDismiss(
                         val maxY = contentSize.height * DISMISS_DRAG_OVERSHOOT
                         coroutineScope.launch {
                             when (axis) {
-                                DragAxis.Horizontal ->
+                                DragAxis.Horizontal -> {
                                     offsetX.animateTo(
                                         if (offsetX.value > 0f) maxX else -maxX,
                                         tween(DISMISS_ANIMATION_MS),
                                     )
+                                }
 
-                                DragAxis.Vertical ->
+                                DragAxis.Vertical -> {
                                     offsetY.animateTo(-maxY, tween(DISMISS_ANIMATION_MS))
+                                }
                             }
                             onDismiss()
                         }
@@ -114,11 +116,13 @@ fun DragToDismiss(
                             val axis = lockedAxis ?: return@detectDragGestures
                             coroutineScope.launch {
                                 when (axis) {
-                                    DragAxis.Horizontal ->
+                                    DragAxis.Horizontal -> {
                                         offsetX.snapTo((offsetX.value + dragAmount.x).coerceIn(-maxX, maxX))
+                                    }
 
-                                    DragAxis.Vertical ->
+                                    DragAxis.Vertical -> {
                                         offsetY.snapTo((offsetY.value + dragAmount.y).coerceIn(-maxY, 0f))
+                                    }
                                 }
                             }
                         },
@@ -129,13 +133,15 @@ fun DragToDismiss(
                             } else {
                                 val dismissed =
                                     when (axis) {
-                                        DragAxis.Horizontal ->
+                                        DragAxis.Horizontal -> {
                                             abs(offsetX.value) >
                                                 contentSize.width * DISMISS_DRAG_FRACTION
+                                        }
 
-                                        DragAxis.Vertical ->
+                                        DragAxis.Vertical -> {
                                             offsetY.value <
                                                 -contentSize.height * DISMISS_DRAG_FRACTION
+                                        }
                                     }
 
                                 if (dismissed) {
