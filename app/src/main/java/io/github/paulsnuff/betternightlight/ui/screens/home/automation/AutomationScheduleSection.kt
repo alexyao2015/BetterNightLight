@@ -11,6 +11,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -77,7 +78,6 @@ import io.github.paulsnuff.betternightlight.domain.model.TimeOfDay
 import io.github.paulsnuff.betternightlight.ui.components.IconBubble
 import io.github.paulsnuff.betternightlight.ui.components.SelectableCard
 import io.github.paulsnuff.betternightlight.ui.components.TimePickerRow
-import io.github.paulsnuff.betternightlight.ui.components.selectableRowColors
 import io.github.paulsnuff.betternightlight.ui.screens.home.AutomationActions
 import io.github.paulsnuff.betternightlight.ui.theme.BetterNightLightTheme
 
@@ -341,55 +341,56 @@ private fun LocationDetailsSection(
     onCoordinateFieldsCoordinatesChange: (LayoutCoordinates?) -> Unit,
     isFetchingLocation: Boolean = false,
 ) {
-    LocationSourceRow(
-        selected = source == AutomationLocationSource.DEVICE,
-        icon = Icons.Rounded.MyLocation,
-        title = stringResource(R.string.home_automation_use_device_location),
-        isFetching = isFetchingLocation,
-        onClick = {
-            onLocationSourceChange(AutomationLocationSource.DEVICE)
-            onRequestDeviceLocation()
-        },
-    )
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        LocationSourceOption(
+            selected = source == AutomationLocationSource.DEVICE,
+            icon = Icons.Rounded.MyLocation,
+            title = stringResource(R.string.home_automation_use_device_location),
+            isFetching = isFetchingLocation,
+            onClick = {
+                onLocationSourceChange(AutomationLocationSource.DEVICE)
+                onRequestDeviceLocation()
+            },
+        ) {
+            if (latitude != null && longitude != null) {
+                Text(
+                    text =
+                        stringResource(
+                            R.string.home_automation_current_coordinates,
+                            formatCoordinate(latitude),
+                            formatCoordinate(longitude),
+                        ),
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(start = 4.dp),
+                )
+            }
+        }
 
-    if (source == AutomationLocationSource.DEVICE) {
-        if (latitude != null && longitude != null) {
-            Text(
-                text =
-                    stringResource(
-                        R.string.home_automation_current_coordinates,
-                        formatCoordinate(latitude),
-                        formatCoordinate(longitude),
-                    ),
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = 4.dp),
+        LocationSourceOption(
+            selected = source == AutomationLocationSource.MANUAL,
+            icon = Icons.Rounded.EditLocation,
+            title = stringResource(R.string.home_automation_enter_manually),
+            onClick = { onLocationSourceChange(AutomationLocationSource.MANUAL) },
+        ) {
+            ManualCoordinateSection(
+                latitude = latitude,
+                longitude = longitude,
+                onCoordinatesChange = onCoordinatesChange,
+                onBoundsChange = onCoordinateFieldsCoordinatesChange,
             )
         }
-    }
 
-    LocationSourceRow(
-        selected = source == AutomationLocationSource.MANUAL,
-        icon = Icons.Rounded.EditLocation,
-        title = stringResource(R.string.home_automation_enter_manually),
-        onClick = { onLocationSourceChange(AutomationLocationSource.MANUAL) },
-    )
-
-    if (source == AutomationLocationSource.MANUAL) {
-        ManualCoordinateSection(
-            latitude = latitude,
-            longitude = longitude,
-            onCoordinatesChange = onCoordinatesChange,
-            onBoundsChange = onCoordinateFieldsCoordinatesChange,
-        )
-    }
-
-    if (latitude != null && longitude != null) {
-        SunTimesSummary(
-            latitude = latitude,
-            longitude = longitude,
-        )
+        if (latitude != null && longitude != null) {
+            SunTimesSummary(
+                latitude = latitude,
+                longitude = longitude,
+            )
+        }
     }
 }
 
@@ -518,12 +519,13 @@ private fun SunTimeItem(
 }
 
 @Composable
-private fun LocationSourceRow(
+private fun LocationSourceOption(
     selected: Boolean,
     icon: ImageVector,
     title: String,
     onClick: () -> Unit,
     isFetching: Boolean = false,
+    content: (@Composable () -> Unit)? = null,
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "locationSearch")
     val pulse by infiniteTransition.animateFloat(
@@ -537,47 +539,78 @@ private fun LocationSourceRow(
         label = "locationSearchPulse",
     )
 
-    Row(
+    Card(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .selectableRowColors(selected)
-                .clickable(enabled = !isFetching, onClick = onClick)
-                .padding(horizontal = 14.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        RadioButton(selected = selected, enabled = !isFetching, onClick = onClick)
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint =
-                if (selected) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
-            modifier =
-                Modifier
-                    .size(22.dp)
-                    .graphicsLayer {
-                        if (isFetching) {
-                            alpha = pulse
-                            scaleX = 1f + 0.25f * pulse
-                            scaleY = 1f + 0.25f * pulse
-                        }
+                .clickable(enabled = !isFetching, onClick = onClick),
+        colors =
+            CardDefaults.cardColors(
+                containerColor =
+                    if (selected) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surfaceContainerHigh
                     },
-        )
+            ),
+        border =
+            BorderStroke(
+                width = if (selected) 1.5.dp else 1.dp,
+                color =
+                    if (selected) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    },
+            ),
+        shape = RoundedCornerShape(14.dp),
+    ) {
         Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                RadioButton(selected = selected, enabled = !isFetching, onClick = onClick)
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint =
+                        if (selected) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                    modifier =
+                        Modifier
+                            .size(22.dp)
+                            .graphicsLayer {
+                                if (isFetching) {
+                                    alpha = pulse
+                                    scaleX = 1f + 0.25f * pulse
+                                    scaleY = 1f + 0.25f * pulse
+                                }
+                            },
+                )
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color =
+                        if (selected) {
+                            MaterialTheme.colorScheme.onPrimaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            if (selected) {
+                content?.invoke()
+            }
         }
     }
 }
