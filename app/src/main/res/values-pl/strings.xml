@@ -140,6 +140,8 @@
     <string name="settings_theme_dark">Ciemny</string>
 
     <string name="settings_material_you_title">Material You</string>
+    <string name="settings_battery_optimization_title">Optymalizacja baterii</string>
+    <string name="settings_battery_optimization_subtitle">Jeśli aktualizacja temperatury Night Light nie działa w tle, wyłącz optymalizację baterii dla tej aplikacji.</string>
     <string name="dialog_cancel">Anuluj</string>
 
     <!-- Usługa pierwszego planu automatyzacji -->

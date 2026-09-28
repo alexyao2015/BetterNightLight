@@ -1,6 +1,8 @@
 package io.github.paulsnuff.betternightlight.ui.screens.settings
 
+import android.content.Intent
 import android.os.Build
+import android.provider.Settings
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesome
+import androidx.compose.material.icons.rounded.BatterySaver
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material3.Card
@@ -29,7 +32,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.core.net.toUri
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -87,6 +92,15 @@ fun SettingsScreen(
 ) {
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showThemeDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    fun openBatteryOptimizationSettings() {
+        val requestPopup =
+            Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                data = "package:${context.packageName}".toUri()
+            }
+        runCatching { context.startActivity(requestPopup) }
+    }
 
     Column(
         modifier =
@@ -174,6 +188,14 @@ fun SettingsScreen(
                 }
             }
         }
+
+        // 4. Battery optimization info tile
+        SettingsTile(
+            icon = Icons.Rounded.BatterySaver,
+            title = stringResource(R.string.settings_battery_optimization_title),
+            subtitle = stringResource(R.string.settings_battery_optimization_subtitle),
+            onClick = ::openBatteryOptimizationSettings,
+        )
     }
 
     // Language Selection Dialog Popup

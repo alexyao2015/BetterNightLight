@@ -139,6 +139,8 @@
     <string name="settings_theme_dark">Dark</string>
 
     <string name="settings_material_you_title">Material You</string>
+    <string name="settings_battery_optimization_title">Battery optimization</string>
+    <string name="settings_battery_optimization_subtitle">If Night Light temperature doesn\'t update in the background, disable battery optimization for this app.</string>
     <string name="dialog_cancel">Cancel</string>
 
     <!-- Automation foreground service -->
