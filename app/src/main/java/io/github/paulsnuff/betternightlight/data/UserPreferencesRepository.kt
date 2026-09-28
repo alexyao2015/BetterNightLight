@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import io.github.paulsnuff.betternightlight.domain.DEFAULT_BOOST_TIME
 import io.github.paulsnuff.betternightlight.domain.DEFAULT_MANUAL_END
@@ -50,6 +51,10 @@ interface UserPreferencesRepository {
 
     suspend fun updateAutomationSchedule(schedule: AutomationSchedule)
 
+    suspend fun lastLocationRefreshMillis(): Long?
+
+    suspend fun markLocationRefreshed(epochMillis: Long)
+
     suspend fun isWizardCompleted(): Boolean
 
     suspend fun setWizardCompleted()
@@ -76,6 +81,8 @@ private object PreferencesKeys {
     val AUTOMATION_PHASE_TRANSITION = stringPreferencesKey("automation_phase_transition")
     val AUTOMATION_OFF_ENABLED = booleanPreferencesKey("automation_off_enabled")
     val AUTOMATION_OFF_MINUTES = intPreferencesKey("automation_off_minutes")
+
+    val LAST_LOCATION_REFRESH_MILLIS = longPreferencesKey("last_location_refresh_millis")
 }
 
 @Singleton
@@ -157,6 +164,19 @@ class UserPreferencesRepositoryImpl
                 preferences[PreferencesKeys.AUTOMATION_PHASE_TRANSITION] = schedule.phaseTransition.name
                 preferences[PreferencesKeys.AUTOMATION_OFF_ENABLED] = schedule.offEnabled
                 preferences[PreferencesKeys.AUTOMATION_OFF_MINUTES] = schedule.offTime.minutes
+            }
+        }
+
+        override suspend fun lastLocationRefreshMillis(): Long? =
+            try {
+                dataStore.data.first()[PreferencesKeys.LAST_LOCATION_REFRESH_MILLIS]
+            } catch (_: IOException) {
+                null
+            }
+
+        override suspend fun markLocationRefreshed(epochMillis: Long) {
+            dataStore.edit { preferences ->
+                preferences[PreferencesKeys.LAST_LOCATION_REFRESH_MILLIS] = epochMillis
             }
         }
 

@@ -16,7 +16,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.roundToInt
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 @Singleton
@@ -38,14 +41,28 @@ class DeviceLocationRefreshCoordinator
                     delay(INITIAL_REFRESH_DELAY)
                     while (true) {
                         runSafely { refreshIfNeeded() }
-                        delay(REFRESH_INTERVAL)
+                        delay(nextTickDelay())
                     }
                 }
+        }
+
+        private suspend fun nextTickDelay(): Duration {
+            val lastRefresh = userPreferencesRepository.lastLocationRefreshMillis()
+            val nextRefreshAt = (lastRefresh ?: 0L) + REFRESH_INTERVAL.inWholeMilliseconds
+            val remaining = (nextRefreshAt - System.currentTimeMillis()).milliseconds + TICK_SLACK
+            return remaining.coerceIn(MIN_TICK_DELAY, REFRESH_INTERVAL)
         }
 
         private suspend fun refreshIfNeeded(): Boolean {
             val schedule = userPreferencesRepository.automationScheduleFlow.first()
             if (!shouldRefresh(schedule)) return false
+
+            val lastRefresh = userPreferencesRepository.lastLocationRefreshMillis()
+            val now = System.currentTimeMillis()
+            if (lastRefresh != null && now - lastRefresh < MIN_REFRESH_GAP.inWholeMilliseconds) {
+                Log.i(TAG, "Location refreshed recently, skipping until interval elapses")
+                return false
+            }
 
             val permissionLevel = permissionChecker.currentLevel()
             if (!permissionChecker.canAccessNow(foregroundTracker.isForeground)) {
@@ -67,6 +84,7 @@ class DeviceLocationRefreshCoordinator
 
             val latitude = (location.latitude * 100.0).roundToInt() / 100.0
             val longitude = (location.longitude * 100.0).roundToInt() / 100.0
+            userPreferencesRepository.markLocationRefreshed(now)
             if (schedule.latitude == latitude && schedule.longitude == longitude) {
                 Log.i(TAG, "Location unchanged, no schedule update needed")
                 return false
@@ -94,5 +112,9 @@ class DeviceLocationRefreshCoordinator
             private const val TAG = "BnlLocationRefresh"
             private val INITIAL_REFRESH_DELAY = 30.seconds
             private val REFRESH_INTERVAL = 1.hours
+
+            private val MIN_REFRESH_GAP = REFRESH_INTERVAL
+            private val TICK_SLACK = 1.minutes
+            private val MIN_TICK_DELAY = 1.minutes
         }
     }
