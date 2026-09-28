@@ -55,7 +55,8 @@ fun Modifier.selectableRowColors(selected: Boolean): Modifier =
             } else {
                 MaterialTheme.colorScheme.surfaceContainerHigh
             },
-        ).border(
+        )
+        .border(
             width = 1.dp,
             color =
                 if (selected) {

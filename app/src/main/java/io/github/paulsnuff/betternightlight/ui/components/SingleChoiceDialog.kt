@@ -69,7 +69,8 @@ fun <T> SingleChoiceDialog(
                                     selected = isSelected,
                                     onClick = { onSelect(option) },
                                     role = Role.RadioButton,
-                                ).padding(horizontal = 8.dp, vertical = 12.dp),
+                                )
+                                .padding(horizontal = 8.dp, vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {

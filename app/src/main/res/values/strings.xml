@@ -142,6 +142,8 @@
     <string name="settings_material_you_title">Material You</string>
     <string name="settings_battery_optimization_title">Battery optimization</string>
     <string name="settings_battery_optimization_subtitle">If Night Light temperature doesn\'t update in the background, disable battery optimization for this app.</string>
+    <string name="settings_background_location_title">Background location</string>
+    <string name="settings_background_location_subtitle">If you want your location to be updated in the background, set the location permission to \"Allow all the time\" in app settings.</string>
     <string name="dialog_cancel">Cancel</string>
 
     <!-- Automation foreground service -->

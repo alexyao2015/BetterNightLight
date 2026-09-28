@@ -390,7 +390,8 @@ private fun NightPhasesTimeline(
                                 .fillMaxWidth(endFraction - startFraction)
                                 .absoluteOffset(
                                     x = with(density) { (totalWidthPx * startFraction).toDp() },
-                                ).background(colorFor(segment.type)),
+                                )
+                                .background(colorFor(segment.type)),
                     )
                 }
 

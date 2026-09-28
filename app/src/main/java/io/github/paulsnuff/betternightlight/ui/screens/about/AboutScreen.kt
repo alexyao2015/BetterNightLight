@@ -326,7 +326,8 @@ private fun LibrariesDialog(onDismiss: () -> Unit) {
                                             ClipData.newPlainText("library", library),
                                         )
                                     },
-                                ).padding(horizontal = 4.dp, vertical = 10.dp),
+                                )
+                                .padding(horizontal = 4.dp, vertical = 10.dp),
                     )
                     if (index != libraries.lastIndex) {
                         HorizontalDivider(

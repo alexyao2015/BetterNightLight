@@ -118,7 +118,8 @@ internal fun KelvinSliderControl(
                             } else {
                                 Modifier
                             },
-                        ).onFocusChanged { focusState ->
+                        )
+                        .onFocusChanged { focusState ->
                             if (!focusState.isFocused) {
                                 isEditingText = false
                                 commitText()

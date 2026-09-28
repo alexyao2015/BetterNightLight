@@ -103,7 +103,8 @@ fun AutomationStep(
                         temperatureFieldBounds.first,
                         boostTemperatureFieldBounds.first,
                     )
-                }.padding(bottom = contentBottomPadding),
+                }
+                .padding(bottom = contentBottomPadding),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         AutomationToggleCard(
