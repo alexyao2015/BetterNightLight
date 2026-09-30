@@ -128,13 +128,15 @@ fun AppSwitch(
                             true
                         }
                     }
-                }.clip(RoundedCornerShape(trackHeight / 2))
+                }
+                .clip(RoundedCornerShape(trackHeight / 2))
                 .background(trackColor)
                 .border(
                     width = 2.dp,
                     color = borderColor,
                     shape = RoundedCornerShape(trackHeight / 2),
-                ).pointerInput(enabled) {
+                )
+                .pointerInput(enabled) {
                     if (!enabled) return@pointerInput
                     val travelPx = with(density) { travelDistance.toPx() }
                     val touchSlop = viewConfiguration.touchSlop

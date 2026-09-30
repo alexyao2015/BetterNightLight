@@ -1,6 +1,12 @@
 package io.github.paulsnuff.betternightlight.ui.screens.settings
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
+import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,7 +20,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesome
+import androidx.compose.material.icons.rounded.BatterySaver
 import androidx.compose.material.icons.rounded.Language
+import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -29,11 +37,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.paulsnuff.betternightlight.R
 import io.github.paulsnuff.betternightlight.data.AppLanguage
@@ -87,6 +98,60 @@ fun SettingsScreen(
 ) {
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showThemeDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    fun openBatteryOptimizationSettings() {
+        val requestPopup =
+            Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                data = "package:${context.packageName}".toUri()
+            }
+        runCatching { context.startActivity(requestPopup) }
+    }
+
+    fun openLocationPermissionSettings() {
+        val appDetails =
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = "package:${context.packageName}".toUri()
+            }
+        runCatching { context.startActivity(appDetails) }
+    }
+
+    fun isGranted(permission: String): Boolean = ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+
+    val backgroundLocationLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission(),
+        ) { granted ->
+            if (!granted) openLocationPermissionSettings()
+        }
+
+    val foregroundLocationLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission(),
+        ) { granted ->
+            if (granted) {
+                backgroundLocationLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+            } else {
+                openLocationPermissionSettings()
+            }
+        }
+
+    fun requestBackgroundLocation() {
+        when {
+            isGranted(Manifest.permission.ACCESS_BACKGROUND_LOCATION) -> {
+                Unit
+            }
+
+            isGranted(Manifest.permission.ACCESS_FINE_LOCATION) ||
+                isGranted(Manifest.permission.ACCESS_COARSE_LOCATION) -> {
+                backgroundLocationLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+            }
+
+            else -> {
+                foregroundLocationLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+        }
+    }
 
     Column(
         modifier =
@@ -174,6 +239,22 @@ fun SettingsScreen(
                 }
             }
         }
+
+        // 4. Battery optimization info tile
+        SettingsTile(
+            icon = Icons.Rounded.BatterySaver,
+            title = stringResource(R.string.settings_battery_optimization_title),
+            subtitle = stringResource(R.string.settings_battery_optimization_subtitle),
+            onClick = ::openBatteryOptimizationSettings,
+        )
+
+        // 5. Background location permission tile
+        SettingsTile(
+            icon = Icons.Rounded.LocationOn,
+            title = stringResource(R.string.settings_background_location_title),
+            subtitle = stringResource(R.string.settings_background_location_subtitle),
+            onClick = ::requestBackgroundLocation,
+        )
     }
 
     // Language Selection Dialog Popup

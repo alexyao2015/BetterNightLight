@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Better Night Light</string>
+    <string name="common_close">Zamknij</string>
 
     <!-- Navigation Labels -->
     <string name="nav_home">Główna</string>
@@ -139,6 +140,10 @@
     <string name="settings_theme_dark">Ciemny</string>
 
     <string name="settings_material_you_title">Material You</string>
+    <string name="settings_battery_optimization_title">Optymalizacja baterii</string>
+    <string name="settings_battery_optimization_subtitle">Jeśli aktualizacja temperatury Night Light nie działa w tle, wyłącz optymalizację baterii dla tej aplikacji.</string>
+    <string name="settings_background_location_title">Lokalizacja w tle</string>
+    <string name="settings_background_location_subtitle">Jeśli chcesz, aby lokalizacja była aktualizowana w tle, ustaw uprawnienie lokalizacji na \"Zawsze\" w ustawieniach aplikacji.</string>
     <string name="dialog_cancel">Anuluj</string>
 
     <!-- Usługa pierwszego planu automatyzacji -->

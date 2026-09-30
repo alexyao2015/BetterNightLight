@@ -249,6 +249,7 @@ private fun AboutHeader(modifier: Modifier = Modifier) {
             Text(
                 text = "v$versionName",
                 style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
@@ -325,7 +326,8 @@ private fun LibrariesDialog(onDismiss: () -> Unit) {
                                             ClipData.newPlainText("library", library),
                                         )
                                     },
-                                ).padding(horizontal = 4.dp, vertical = 10.dp),
+                                )
+                                .padding(horizontal = 4.dp, vertical = 10.dp),
                     )
                     if (index != libraries.lastIndex) {
                         HorizontalDivider(
